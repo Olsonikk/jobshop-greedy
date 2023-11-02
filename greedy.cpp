@@ -94,4 +94,3 @@ int main() {
 }
 
 
-//TODO zmienic kolejnosc w tuplach
