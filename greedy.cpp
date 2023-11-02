@@ -10,7 +10,13 @@ using namespace std;
 
 bool compareTuples(const tuple<int, int>& tuple1, const tuple<int, int>& tuple2) {
     // Porównujemy tupla na podstawie pierwszego elementu
-    return get<0>(tuple1) < get<0>(tuple2);
+    return get<1>(tuple1) < get<1>(tuple2);
+}
+
+void print_element(int job_n, int task_n, vector<vector<tuple<int,int>>> local_vector){
+    int machine_n, duration;
+    tie(machine_n, duration) = local_vector[job_n][task_n];
+    cout << "Job: " << job_n << " Task: " << task_n << " Machine: " << machine_n << " Duration: " << duration <<endl;
 }
 
 int main() {
@@ -19,9 +25,9 @@ int main() {
     // int** processed = new int*[machines];
 
     vector<vector<tuple<int,int>>> ricardo;
-    vector<tuple<int,int>> job0  = {make_tuple(2, 0), make_tuple(2, 1), make_tuple(2, 2)};
-    vector<tuple<int,int>> job1  = {make_tuple(2, 1), make_tuple(4, 0), make_tuple(1, 2)};
-    vector<tuple<int,int>> job2  = {make_tuple(4, 2), make_tuple(2, 1), make_tuple(1, 0)};
+    vector<tuple<int,int>> job0  = {make_tuple(0, 2), make_tuple(1, 2), make_tuple(2, 2)};
+    vector<tuple<int,int>> job1  = {make_tuple(1, 2), make_tuple(0, 4), make_tuple(2, 1)};
+    vector<tuple<int,int>> job2  = {make_tuple(2, 4), make_tuple(1, 2), make_tuple(0, 1)};
    
     ricardo.push_back(job0);
     ricardo.push_back(job1);
@@ -77,6 +83,13 @@ int main() {
         }
         cout << endl;
     }
+
+    //Schedulling
+
+
+    print_element(2, 1, ricardo);
+
+    
     return 0;
 }
 
