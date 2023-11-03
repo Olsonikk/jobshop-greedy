@@ -4,6 +4,8 @@
 #include <vector>
 #include <tuple>
 #include <algorithm> 
+#include <fstream>
+#include <string>
 
 
 using namespace std;
@@ -19,46 +21,44 @@ void print_element(int job_n, int task_n, vector<vector<tuple<int,int>>> local_v
     cout << "Job: " << job_n << " Task: " << task_n << " Machine: " << machine_n << " Duration: " << duration <<endl;
 }
 
-int main() {
-    int jobs = 3;
-    int machines = 3;
-    // int** processed = new int*[machines];
+vector<vector<tuple<int,int>>> read_orlib(string filename, int* jobs, int* machines){
+    ifstream input_file(filename);
+    
+    tuple<int, int> task;
 
+    if(input_file.fail()){
+        perror("Error ocurred while opening the file!");
+        exit(1);
+    }
+    else{
+        int a,b;
+        
+        input_file >> *jobs;
+        input_file >> *machines;
+        vector<vector<tuple<int,int>>> main_vector(*machines);
+        for(int x=0; x < *jobs; x++){
+            for(int i=0; i < *machines; i++){
+            input_file >> a >> b;
+            task = make_tuple(a,b);
+            main_vector[x].push_back(task);
+        } 
+        }
+        return main_vector;
+    }
+    
+}
+
+int main(int argc, char** argv) {
+
+    int jobs, machines;
     vector<vector<tuple<int,int>>> ricardo;
-    vector<tuple<int,int>> job0  = {make_tuple(0, 2), make_tuple(1, 2), make_tuple(2, 2)};
-    vector<tuple<int,int>> job1  = {make_tuple(1, 2), make_tuple(0, 4), make_tuple(2, 1)};
-    vector<tuple<int,int>> job2  = {make_tuple(2, 4), make_tuple(1, 2), make_tuple(0, 1)};
-   
-    ricardo.push_back(job0);
-    ricardo.push_back(job1);
-    ricardo.push_back(job2);
 
-    // for(int i = 0; i < machines; i++) {
-    //     processed[i] = new int[jobs];
-    //     for (int j = 0; j < jobs; j++) {
-    //         processed[i][j] = 0;
-    //     }
-    // }
+    ricardo = read_orlib(argv[1], &jobs, &machines);
 
-    // for (int i = 0; i < machines; i++) {
-    //     for (int j = 0; j < jobs; j++) {
-    //         cout << processed[i][j] << " ";
-    //     }
-    //     cout << endl;
-    // }
+    cout << endl;
 
-
-    // int machine_n[3][3] = {
-    //     {0, 1, 2},
-    //     {1, 0, 2},
-    //     {2, 1, 0}
-    // };
-
-    // int task_length[3][3] = {
-    //     {2, 2, 2},
-    //     {2, 4, 1},
-    //     {4, 2, 1}
-    // };
+    cout << "JOBS: " << jobs << endl << "MACHINES: " << machines << endl;
+        
 
      for (const auto& innerVector : ricardo) {
         for (const auto& tuple : innerVector) {
@@ -87,8 +87,9 @@ int main() {
     //Schedulling
 
 
-    print_element(2, 1, ricardo);
+    print_element(2, 2, ricardo);
 
+   
     
     return 0;
 }
