@@ -10,9 +10,9 @@
 
 using namespace std;
 
-bool compareTuples(const array<int, 2>& tuple1, const array<int, 2>& tuple2) {
+bool compareTasks(const array<int, 2>& task1, const array<int, 2>& task2) {
     // Porównujemy tupla na podstawie pierwszego elementu
-    return get<1>(tuple1) < get<1>(tuple2);
+    return get<1>(task1) < get<1>(task2);
 }
 
 /*void print_element(int job_n, int task_n, vector<vector<array<int,2>>> local_vector){
@@ -95,23 +95,23 @@ int main(int argc, char** argv) {
         
 
      for (const auto& innerVector : ricardo) {
-        for (const auto& tuple : innerVector) {
+        for (const auto& task : innerVector) {
             int firstElement, secondElement;
-            cout << "(" << tuple[0] << ", " << tuple[1] << ") ";
+            cout << "(" << task[0] << ", " << task[1] << ") ";
         }
         cout << endl;
     }
 
 
     for (auto& innerVector : ricardo) {
-            sort(innerVector.begin(), innerVector.end(), compareTuples);
+            sort(innerVector.begin(), innerVector.end(), compareTasks);
         }
 
     cout << endl;
     for (const auto& innerVector : ricardo) {
-        for (const auto& tuple : innerVector) {
+        for (const auto& task : innerVector) {
             int firstElement, secondElement;
-            cout << "(" << tuple[0] << ", " << tuple[1] << ") ";
+            cout << "(" << task[0] << ", " << task[1] << ") ";
         }
         cout << endl;
     }
@@ -123,9 +123,9 @@ int main(int argc, char** argv) {
     putTasks(jobs,machines,ricardo,jobs_free,currTime,job_total);
    
    for (const auto& innerVector : ricardo) {
-        for (const auto& tuple : innerVector) {
+        for (const auto& task : innerVector) {
             int firstElement, secondElement;
-            cout << "(" << tuple[0] << ", " << tuple[1] << ") ";
+            cout << "(" << task[0] << ", " << task[1] << ") ";
         }
         cout << endl;
     }
