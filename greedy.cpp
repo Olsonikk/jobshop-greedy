@@ -11,7 +11,7 @@
 using namespace std;
 
 bool compareTasks(const array<int, 2>& task1, const array<int, 2>& task2) {
-    // Porównujemy tupla na podstawie pierwszego elementu
+    // Porównujemy taska na podstawie pierwszego elementu
     return get<1>(task1) < get<1>(task2);
 }
 
