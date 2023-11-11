@@ -53,20 +53,80 @@ bool TimeLeft(int elem, int currTime, int * job_total){
     return false;
 }
 
-void putTasks(int jobs, int machines, vector<vector<array<int,2>>> &arr, int* jobs_free, int currTime, int* job_total){
+int currTimeJump(int currTime, int* job_total, int jobs, bool success){ //jesli success=true, zwroc najmniejsza, ww. drugi najmniejszy
+    int smallest;
+    int second_smallest;
+
+    if(job_total[0] < job_total[1]){
+        smallest = job_total[0];
+        second_smallest = job_total[1];
+    }
+    else{
+        smallest = job_total[1];
+        second_smallest = job_total[0];
+    }
+    for(int i = 2; i<jobs; i++){
+        if(job_total[i] < second_smallest){
+            if(job_total[i] < smallest){
+                smallest = job_total[i];
+            }
+            else{
+                second_smallest = job_total[i];
+            }
+        }
+    }
+    if(success) return smallest;
+    return second_smallest;
+    
+}
+
+void putTasks(int jobs, int machines, vector<vector<array<int,2>>> &arr, int *jobs_free, int& currTime, int* job_total){
     int duration,machine_n;
+    bool jobs_inserted;
     for(int i=0;i<jobs;i++){
+        jobs_inserted = false;
         for(int j=0;j<machines;j++){
             duration = arr[i][j][1];
             machine_n = arr[i][j][0];
-            if(jobs_free[i] == 0 && TimeLeft(duration,currTime,job_total)){
-                cout<<machine_n<<" "<<duration<<endl;
+            if(jobs_free[i] == 0 && TimeLeft(machine_n,currTime,job_total) && machine_n >= 0){ //success!
+                jobs_inserted = true;
                 jobs_free[i]=duration;
                 job_total[machine_n] += duration;
                 arr[i][j][0]=-1;
                 break;
             }
         }
+    }
+
+    currTime = currTimeJump(currTime, job_total, jobs, jobs_inserted);
+}
+
+void printArray(int* array, int jobs){
+    for(int i = 0; i<jobs;i++){
+        cout << array[i] << " ";
+    }
+    cout << endl;
+}
+
+void printVector(vector<vector<array<int,2>>> mainVector){
+    for (const auto& innerVector : mainVector) {
+        for (const auto& task : innerVector) {
+            int firstElement, secondElement;
+            cout << "(" << task[0] << ", " << task[1] << ") ";
+        }
+        cout << endl;
+    }
+    cout << endl;
+}
+
+
+
+void updateJF(int* jobs_free, int currTime, int jobs){
+    for(int i=0; i< jobs; i++){
+        if(jobs_free[i] - currTime > 0){
+            jobs_free[i] -= currTime;
+        }
+        else jobs_free[i] = 0;
     }
 }
 
@@ -87,49 +147,49 @@ int main(int argc, char** argv) {
     for (int i = 0; i<jobs; i++)
 		output[i] = new int [machines];
 
-    
-
-    cout << endl;
-
     cout << "JOBS: " << jobs << endl << "MACHINES: " << machines << endl;
         
+    printVector(ricardo);
 
-     for (const auto& innerVector : ricardo) {
-        for (const auto& task : innerVector) {
-            int firstElement, secondElement;
-            cout << "(" << task[0] << ", " << task[1] << ") ";
-        }
-        cout << endl;
-    }
-
-
-    for (auto& innerVector : ricardo) {
+    for(auto& innerVector : ricardo) {
             sort(innerVector.begin(), innerVector.end(), compareTasks);
         }
 
-    cout << endl;
-    for (const auto& innerVector : ricardo) {
-        for (const auto& task : innerVector) {
-            int firstElement, secondElement;
-            cout << "(" << task[0] << ", " << task[1] << ") ";
-        }
-        cout << endl;
-    }
+    printVector(ricardo);
 
     //Schedulling
 
-
-    //print_element(2, 2, ricardo);
     putTasks(jobs,machines,ricardo,jobs_free,currTime,job_total);
-   
-   for (const auto& innerVector : ricardo) {
-        for (const auto& task : innerVector) {
-            int firstElement, secondElement;
-            cout << "(" << task[0] << ", " << task[1] << ") ";
-        }
-        cout << endl;
-    }
+
     
+    cout << "curtime" << currTime;
+    cout << endl;
+
+    updateJF(jobs_free, currTime, jobs);
+
+    printVector(ricardo);
+    
+    printArray(jobs_free, jobs);
+    printArray(job_total, jobs);
+
+
+    cout << endl;
+    cout << endl;
+    cout << endl;
+
+    putTasks(jobs,machines,ricardo,jobs_free,currTime,job_total);
+
+    
+    cout << "curtime" << currTime;
+    cout << endl;
+
+    updateJF(jobs_free, currTime, jobs);
+
+    printVector(ricardo);
+    
+    printArray(jobs_free, jobs);
+    printArray(job_total, jobs);
+
     return 0;
 }
 
