@@ -107,32 +107,19 @@ void putTasks(int jobs, int machines, vector<vector<array<int,2>>> &arr, int *jo
         for(int j=0;j<machines;j++){
             duration = arr[i][j][1];
             machine_n = arr[i][j][0];
-            if(jobs_free[i] == 0 && TimeLeft(machine_n,currTime,job_total) && machine_n >= 0){ //success!
-                jobs_inserted = true;
-                jobs_free[i]=duration;
-                out[i].push(currTime);
-                job_total[machine_n] += duration;
-                arr[i][j][0]=-1;
-                ctrl++;
-                break;
-            }
-        }
-        // for(int j=0;j<machines;j++){
-        //     duration = arr[i][j][1];
-        //     machine_n = arr[i][j][0];
-        //         if(machine_n>=0){
-        //             if(jobs_free[i] == 0 && TimeLeft(machine_n,currTime,job_total) && machine_n >= 0){ //success!
-        //                 jobs_inserted = true;
-        //                 jobs_free[i]=duration;
-        //                 out[i].push(currTime);
-        //                 job_total[machine_n] += duration;
-        //                 arr[i][j][0]=-1;
-        //                 ctrl++;
-        //             }
-        //             break;
-        //         }
+                if(machine_n>=0){
+                    if(jobs_free[i] == 0 && TimeLeft(machine_n,currTime,job_total) && machine_n >= 0){ //success!
+                        jobs_inserted = true;
+                        jobs_free[i]=duration;
+                        out[i].push(currTime);
+                        job_total[machine_n] += duration;
+                        arr[i][j][0]=-1;
+                        ctrl++;
+                    }
+                    break;
+                }
             
-        // }
+        }
     }
 
     currTime = currTimeJump(currTime, job_total, jobs, jobs_inserted);
