@@ -24,30 +24,48 @@ bool compareTasks(const array<int, 2>& task1, const array<int, 2>& task2) {
 }*/
 
 vector<vector<array<int,2>>> read_orlib(string filename, int* jobs, int* machines){
-    ifstream input_file(filename);
+    //ifstream input_file(filename);
     
-    array<int,2> task;
+    // array<int,2> task;
 
-    if(input_file.fail()){
-        perror("Error ocurred while opening the file!");
+    // if(input_file.fail()){
+    //     perror("Error ocurred while opening the file!");
+    //     exit(1);
+    // }
+    // else{
+    //     int a,b;
+        
+    //     input_file >> *jobs;
+    //     input_file >> *machines;
+    //     vector<vector<array<int,2>>> main_vector(*machines);
+    //     for(int x=0; x < *jobs; x++){
+    //         for(int i=0; i < *machines; i++){
+    //         input_file >> a >> b;
+    //         task = {a,b};
+    //         main_vector[x].push_back(task);
+    //     } 
+    //     }
+    //     return main_vector;
+    // }
+    ifstream inputFile(filename);  // Zastąp "nazwa_pliku.txt" właściwą nazwą pliku
+
+    if (!inputFile.is_open()) {
+        cout << "Nie można otworzyć pliku!" << endl;
         exit(1);
     }
-    else{
-        int a,b;
-        
-        input_file >> *jobs;
-        input_file >> *machines;
-        vector<vector<array<int,2>>> main_vector(*machines);
-        for(int x=0; x < *jobs; x++){
-            for(int i=0; i < *machines; i++){
-            input_file >> a >> b;
-            task = {a,b};
-            main_vector[x].push_back(task);
-        } 
+
+    inputFile >> *jobs >> *machines;
+
+    vector<vector<array<int, 2>>> data(*jobs, vector<array<int, 2>>(*machines));
+
+    for (int i = 0; i < *jobs; ++i) {
+        for (int j = 0; j < *machines; ++j) {
+            inputFile >> data[i][j][0] >> data[i][j][1];
         }
-        return main_vector;
     }
-    
+
+    inputFile.close();
+    return data;
 }
 
 bool TimeLeft(int elem, int currTime, int * job_total){
@@ -107,10 +125,12 @@ void putTasks(int jobs, int machines, vector<vector<array<int,2>>> &arr, int *jo
         for(int j=0;j<machines;j++){
             duration = arr[i][j][1];
             machine_n = arr[i][j][0];
+            //do osobnej funkcji bool
                 if(machine_n>=0){
-                    if(jobs_free[i] == 0 && TimeLeft(machine_n,currTime,job_total) && machine_n >= 0){ //success!
+                    if(jobs_free[i] == 0 && TimeLeft(machine_n,currTime,job_total)){ //success!
                         jobs_inserted = true;
                         jobs_free[i]=duration;
+                        //przerobić na funkcje
                         out[i].push(currTime);
                         job_total[machine_n] += duration;
                         arr[i][j][0]=-1;
@@ -167,13 +187,14 @@ void updateJF(int* jobs_free, int GoneCurrTime, int CurrTime,int jobs){
 
 int main(int argc, char** argv) {
 
+    
     int jobs, machines;
     vector<vector<array<int,2>>> ricardo;
     int control = 0;
-
+    
     //ricardo = read_orlib(argv[1], &jobs, &machines);
-    ricardo = read_orlib("instance2.txt", &jobs, &machines);
-
+    ricardo = read_orlib("instance1.txt", &jobs, &machines);
+    
     int currTime = 0;
     int goneCurrTime;
     int * jobs_free = new int[jobs];
@@ -193,44 +214,6 @@ int main(int argc, char** argv) {
         
     printVector(ricardo);
 
-    // for(auto& innerVector : ricardo) {
-    //         sort(innerVector.begin(), innerVector.end(), compareTasks);
-    //     }
-
-    //printVector(ricardo);
-
-    //Schedulling
-
-    // putTasks(jobs,machines,ricardo,jobs_free,currTime,job_total);
-
-    
-    // cout << "curtime" << currTime;
-    // cout << endl;
-
-    // updateJF(jobs_free, currTime, jobs);
-
-    // printVector(ricardo);
-    
-    // printArray(jobs_free, jobs);
-    // printArray(job_total, jobs);
-
-
-    // cout << endl;
-    // cout << endl;
-    // cout << endl;
-
-    // putTasks(jobs,machines,ricardo,jobs_free,currTime,job_total);
-
-    
-    // cout << "curtime" << currTime;
-    // cout << endl;
-
-    // updateJF(jobs_free, currTime, jobs);
-
-    // printVector(ricardo);
-    
-    // printArray(jobs_free, jobs);
-    // printArray(job_total, jobs);
     
     while(control<jobs*machines){
         printArray(jobs_free, jobs);
