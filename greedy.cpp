@@ -21,6 +21,39 @@ bool compareTasks(const vector<int>& task1, const vector<int>& task2) {
     cout << "Job: " << job_n << " Task: " << task_n << " Machine: " << machine_n << " Duration: " << duration <<endl;
 }*/
 
+vector<vector<array<int,2>>> read_tailard(string filename, int* jobs, int* machines){
+    ifstream inputFile(filename);
+
+    if (!inputFile.is_open()) {
+        cout << "Nie można otworzyć pliku!" << endl;
+        exit(1);
+    }
+
+    string tmp;
+
+    inputFile >> *jobs >> *machines;
+    
+    getline(inputFile, tmp);
+    getline(inputFile, tmp);
+
+    vector<vector<array<int, 2>>> data(*jobs, vector<array<int, 2>>(*machines));
+
+    for (int i = 0; i < *jobs; ++i) {
+        for (int j = 0; j < *machines; ++j) {
+            inputFile >> data[i][j][1];
+        }
+    }
+    inputFile>>tmp;
+    for (int i = 0; i < *jobs; ++i) {
+        for (int j = 0; j < *machines; ++j) {
+            inputFile >> data[i][j][0];
+        }
+    }
+
+    inputFile.close();
+    return data;
+}
+
 vector<vector<array<int,2>>> read_orlib(string filename, int* jobs, int* machines){
     //ifstream input_file(filename);
     
@@ -115,28 +148,29 @@ int currTimeJump(int currTime, int* job_total, int jobs, bool success){ //jesli 
     
 }
 
-void putTasks(int jobs, int machines, vector<vector<array<int,2>>> &arr, int *jobs_free, int& currTime, int* job_total,int& ctrl,vector<stack<int>> &out){
+void putTasks(int jobs, int machines, vector<vector<array<int,2>>> &arr, int *jobs_free, int& currTime, int* job_total, int* priority,int& ctrl,vector<stack<int>> &out){
     int duration,machine_n;
     bool jobs_inserted;
     for(int i=0;i<jobs;i++){
-        jobs_inserted = false;
-        for(int j=0;j<machines;j++){
-            duration = arr[i][j][1];
-            machine_n = arr[i][j][0];
-            //do osobnej funkcji bool
+        if(jobs_free[priority[i]] == 0){  
+            jobs_inserted = false;
+            for(int j=0;j<machines;j++){
+                duration = arr[priority[i]][j][1];
+                machine_n = arr[priority[i]][j][0];
+                //do osobnej funkcji bool
                 if(machine_n>=0){
-                    if(jobs_free[i] == 0 && TimeLeft(machine_n,currTime,job_total)){ //success!
+                    if(TimeLeft(machine_n,currTime,job_total)){ //success!
                         jobs_inserted = true;
-                        jobs_free[i]=duration;
+                        jobs_free[priority[i]]=duration;
                         //przerobić na funkcje
-                        out[i].push(currTime);
+                        out[priority[i]].push(currTime);
                         job_total[machine_n] += duration;
-                        arr[i][j][0]=-1;
+                        arr[priority[i]][j][0]=-1;
                         ctrl++;
                     }
                     break;
                 }
-            
+            }
         }
     }
 
@@ -183,7 +217,7 @@ void updateJF(int* jobs_free, int GoneCurrTime, int CurrTime,int jobs){
     }
 }
 
-int* priority(vector<vector<array<int,2>>> VectorOfVectors){
+int* Priority(vector<vector<array<int,2>>> VectorOfVectors){
     int size = VectorOfVectors.size();
     int inner_size = VectorOfVectors[0].size();
     // int ** ctimes = new int * [size];
@@ -213,11 +247,16 @@ int* priority(vector<vector<array<int,2>>> VectorOfVectors){
 int main(int argc, char** argv) {
     int jobs, machines;
     vector<vector<array<int,2>>> ricardo;
+
+    ricardo = read_tailard("tai04.txt",&jobs, &machines);
+    printVector(ricardo);
+    cout<<jobs<<" "<<machines<<endl;
     int control = 0;
     int* ctimes;
     
     //ricardo = read_orlib(argv[1], &jobs, &machines);
-    ricardo = read_orlib("instance1.txt", &jobs, &machines);
+    // ricardo = read_orlib("instance4.txt", &jobs, &machines);
+    // printVector(ricardo);
     
     int currTime = 0;
     int goneCurrTime;
@@ -234,12 +273,12 @@ int main(int argc, char** argv) {
         output.push_back(job);
     }
 
-    cout << "JOBS: " << jobs << endl << "MACHINES: " << machines << endl;
+    // cout << "JOBS: " << jobs << endl << "MACHINES: " << machines << endl;
         
-    printVector(ricardo);
-    ctimes = priority(ricardo);
-    cout<<"priority: ";
-    printArray(ctimes,jobs);
+    //printVector(ricardo);
+    ctimes = Priority(ricardo);
+    //cout<<"priority: ";
+    //printArray(ctimes,jobs);
     
     while(control<jobs*machines){
         printArray(jobs_free, jobs);
@@ -247,30 +286,33 @@ int main(int argc, char** argv) {
         updateJF(jobs_free, goneCurrTime, currTime, jobs);
         cout<<currTime<<endl;
         goneCurrTime = currTime;
-        putTasks(jobs,machines,ricardo,jobs_free,currTime,job_total,control,output);
+        putTasks(jobs,machines,ricardo,jobs_free,currTime,job_total,ctimes,control,output);
         printVector(ricardo);
         printArray(jobs_free, jobs);
         printArray(job_total, jobs);
         
-        //cout<<control;
+        cout<<control<<endl;
         cout<<endl<<endl;
     }
-    cout<<"Dziala XDDD"<<endl;
-    
+    // //cout<<"Dziala XDDD"<<endl;
+    // printArray(jobs_free, jobs);
+    // printArray(job_total, jobs);
+    // cout<<endl;
     for(int i=0;i<output.size();i++){
         PrintStack(output[i]);
         cout<<endl;
     }
     
-    // for (const auto& innerVector : ctimes) {
-    //     cout << "(" << innerVector[0] << ", " << innerVector[1] << ") ";
-    //     cout << endl;
-    // }
-    // cout << endl;
+    // // for (const auto& innerVector : ctimes) {
+    // //     cout << "(" << innerVector[0] << ", " << innerVector[1] << ") ";
+    // //     cout << endl;
+    // // }
+    // // cout << endl;
     
 
     delete job_total;
     delete jobs_free;
+    delete ctimes;
 
     return 0;
 }
