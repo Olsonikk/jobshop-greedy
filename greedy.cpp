@@ -1,5 +1,3 @@
-// Your First C++ Program
-
 #include <iostream>
 #include <vector>
 #include <array>
@@ -12,9 +10,9 @@
 
 using namespace std;
 
-bool compareTasks(const array<int, 2>& task1, const array<int, 2>& task2) {
+bool compareTasks(const vector<int>& task1, const vector<int>& task2) {
     // Porównujemy taska na podstawie pierwszego elementu
-    return get<1>(task1) < get<1>(task2);
+    return task1[1] > task2[1];
 }
 
 /*void print_element(int job_n, int task_n, vector<vector<array<int,2>>> local_vector){
@@ -185,12 +183,38 @@ void updateJF(int* jobs_free, int GoneCurrTime, int CurrTime,int jobs){
     }
 }
 
-int main(int argc, char** argv) {
+int* priority(vector<vector<array<int,2>>> VectorOfVectors){
+    int size = VectorOfVectors.size();
+    int inner_size = VectorOfVectors[0].size();
+    // int ** ctimes = new int * [size];
+    vector<vector<int>> ctimes(size); // size = job number
+    int * output_ctimes = new int[size];
+    int temp = 0;
+    // for (int i = 0; i<size; i++)
+	// ctimes[i] = new int [2];
 
+    for(int i=0;i<size;i++){
+        temp = 0;
+        for(int j=0;j<inner_size;j++){
+            temp += VectorOfVectors[i][j][1];
+        }
+        ctimes[i].push_back(i);
+        ctimes[i].push_back(temp);
+    }
+    sort(ctimes.begin(), ctimes.end(), compareTasks);
     
+    for(int i=0;i<size;i++){
+        output_ctimes[i] = ctimes[i][0];
+    }
+
+    return output_ctimes;
+}
+
+int main(int argc, char** argv) {
     int jobs, machines;
     vector<vector<array<int,2>>> ricardo;
     int control = 0;
+    int* ctimes;
     
     //ricardo = read_orlib(argv[1], &jobs, &machines);
     ricardo = read_orlib("instance1.txt", &jobs, &machines);
@@ -213,7 +237,9 @@ int main(int argc, char** argv) {
     cout << "JOBS: " << jobs << endl << "MACHINES: " << machines << endl;
         
     printVector(ricardo);
-
+    ctimes = priority(ricardo);
+    cout<<"priority: ";
+    printArray(ctimes,jobs);
     
     while(control<jobs*machines){
         printArray(jobs_free, jobs);
@@ -236,6 +262,13 @@ int main(int argc, char** argv) {
         cout<<endl;
     }
     
+    // for (const auto& innerVector : ctimes) {
+    //     cout << "(" << innerVector[0] << ", " << innerVector[1] << ") ";
+    //     cout << endl;
+    // }
+    // cout << endl;
+    
+
     delete job_total;
     delete jobs_free;
 
