@@ -46,7 +46,8 @@ vector<vector<array<int,2>>> read_tailard(string filename, int* jobs, int* machi
     inputFile>>tmp;
     for (int i = 0; i < *jobs; ++i) {
         for (int j = 0; j < *machines; ++j) {
-            inputFile >> data[i][j][0];
+            inputFile >> tmp;
+            data[i][j][0] = stoi(tmp)-1;
         }
     }
 
@@ -248,7 +249,7 @@ int main(int argc, char** argv) {
     int jobs, machines;
     vector<vector<array<int,2>>> ricardo;
 
-    ricardo = read_tailard("tai04.txt",&jobs, &machines);
+    ricardo = read_tailard("tai01.txt",&jobs, &machines);
     printVector(ricardo);
     cout<<jobs<<" "<<machines<<endl;
     int control = 0;
@@ -281,18 +282,18 @@ int main(int argc, char** argv) {
     //printArray(ctimes,jobs);
     
     while(control<jobs*machines){
-        printArray(jobs_free, jobs);
-        printArray(job_total,jobs);
+        // printArray(jobs_free, jobs);
+        // printArray(job_total,jobs);
         updateJF(jobs_free, goneCurrTime, currTime, jobs);
-        cout<<currTime<<endl;
+        //cout<<currTime<<endl;
         goneCurrTime = currTime;
         putTasks(jobs,machines,ricardo,jobs_free,currTime,job_total,ctimes,control,output);
-        printVector(ricardo);
-        printArray(jobs_free, jobs);
-        printArray(job_total, jobs);
+        // printVector(ricardo);
+        // printArray(jobs_free, jobs);
+        // printArray(job_total, jobs);
         
-        cout<<control<<endl;
-        cout<<endl<<endl;
+        // cout<<control<<endl;
+        // cout<<endl<<endl;
     }
     // //cout<<"Dziala XDDD"<<endl;
     // printArray(jobs_free, jobs);
