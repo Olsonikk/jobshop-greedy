@@ -105,7 +105,7 @@ bool TimeLeft(int elem, int currTime, int * job_total){
     return false;
 }
 
-int currTimeJump(int currTime, int* job_total, int jobs, bool success){ //jesli success=true, zwroc najmniejsza, ww. drugi najmniejszy
+int currTimeJump(int currTime, int* job_total, int machines, bool success){ //jesli success=true, zwroc najmniejsza, ww. drugi najmniejszy
     int smallest;
     int second_smallest;
 
@@ -130,7 +130,7 @@ int currTimeJump(int currTime, int* job_total, int jobs, bool success){ //jesli 
     smallest = INT_MAX;
     second_smallest = INT_MAX;
 
-    for (int i = 0; i < jobs; ++i) {
+    for (int i = 0; i < machines; ++i) {
         if (job_total[i] < smallest) {
             second_smallest = smallest;
             smallest = job_total[i];
@@ -139,7 +139,7 @@ int currTimeJump(int currTime, int* job_total, int jobs, bool success){ //jesli 
         }
     }
     if(!success){
-        for(int i=0;i<jobs;i++){
+        for(int i=0;i<machines;i++){
             if(job_total[i]<second_smallest) job_total[i]=second_smallest; 
         }
         return second_smallest;
@@ -249,22 +249,23 @@ int main(int argc, char** argv) {
     int jobs, machines;
     vector<vector<array<int,2>>> ricardo;
 
-    ricardo = read_tailard("tai01.txt",&jobs, &machines);
-    printVector(ricardo);
-    cout<<jobs<<" "<<machines<<endl;
+    //ricardo = read_tailard("tai01.txt",&jobs, &machines);
+    //printVector(ricardo);
+    //cout<<jobs<<" "<<machines<<endl;
     int control = 0;
     int* ctimes;
     
     //ricardo = read_orlib(argv[1], &jobs, &machines);
-    // ricardo = read_orlib("instance4.txt", &jobs, &machines);
-    // printVector(ricardo);
+    ricardo = read_orlib("instance3.txt", &jobs, &machines);
+    cout<<jobs<<" "<<machines<<endl;
+    printVector(ricardo);
     
     int currTime = 0;
     int goneCurrTime;
     int * jobs_free = new int[jobs];
     fill_n(jobs_free, jobs, 0);
-    int * job_total = new int[jobs];
-    fill_n(job_total, jobs, 0);
+    int * job_total = new int[machines];
+    fill_n(job_total, machines, 0);
     // int ** output = new int * [jobs];
     // for (int i = 0; i<jobs; i++)
 	// 	output[i] = new int [machines];
@@ -289,15 +290,15 @@ int main(int argc, char** argv) {
         goneCurrTime = currTime;
         putTasks(jobs,machines,ricardo,jobs_free,currTime,job_total,ctimes,control,output);
         // printVector(ricardo);
-        // printArray(jobs_free, jobs);
-        // printArray(job_total, jobs);
+        printArray(jobs_free, jobs);
+        printArray(job_total, machines);
         
         // cout<<control<<endl;
-        // cout<<endl<<endl;
+        cout<<endl<<endl;
     }
     // //cout<<"Dziala XDDD"<<endl;
-    // printArray(jobs_free, jobs);
-    // printArray(job_total, jobs);
+    printArray(jobs_free, jobs);
+    printArray(job_total, machines);
     // cout<<endl;
     for(int i=0;i<output.size();i++){
         PrintStack(output[i]);
