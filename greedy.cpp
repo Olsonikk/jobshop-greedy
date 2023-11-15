@@ -10,9 +10,9 @@
 
 using namespace std;
 
-bool compareTasks(const vector<int>& task1, const vector<int>& task2) {
+bool compareTasks(const array<int,3>& task1, const array<int,3>& task2) {
     // Porównujemy taska na podstawie pierwszego elementu
-    return task1[1] > task2[1];
+    return task1[0] > task2[0];
 }
 
 /*void print_element(int job_n, int task_n, vector<vector<array<int,2>>> local_vector){
@@ -230,32 +230,32 @@ void updateJF(int* jobs_free, int GoneCurrTime, int CurrTime,int jobs){
     }
 }
 
-int* Priority(vector<vector<array<int,2>>> VectorOfVectors){
-    int size = VectorOfVectors.size();
-    int inner_size = VectorOfVectors[0].size();
-    // int ** ctimes = new int * [size];
-    vector<vector<int>> ctimes(size); // size = job number
-    int * output_ctimes = new int[size];
-    int temp = 0;
-    // for (int i = 0; i<size; i++)
-	// ctimes[i] = new int [2];
+// int* Priority(vector<vector<array<int,2>>> VectorOfVectors){
+//     int size = VectorOfVectors.size();
+//     int inner_size = VectorOfVectors[0].size();
+//     // int ** ctimes = new int * [size];
+//     vector<vector<int>> ctimes(size); // size = job number
+//     int * output_ctimes = new int[size];
+//     int temp = 0;
+//     // for (int i = 0; i<size; i++)
+// 	// ctimes[i] = new int [2];
 
-    for(int i=0;i<size;i++){
-        temp = 0;
-        for(int j=0;j<inner_size;j++){
-            temp += VectorOfVectors[i][j][1];
-        }
-        ctimes[i].push_back(i);
-        ctimes[i].push_back(temp);
-    }
-    sort(ctimes.begin(), ctimes.end(), compareTasks);
+//     for(int i=0;i<size;i++){
+//         temp = 0;
+//         for(int j=0;j<inner_size;j++){
+//             temp += VectorOfVectors[i][j][1];
+//         }
+//         ctimes[i].push_back(i);
+//         ctimes[i].push_back(temp);
+//     }
+//     sort(ctimes.begin(), ctimes.end(), compareTasks);
     
-    for(int i=0;i<size;i++){
-        output_ctimes[i] = ctimes[i][0];
-    }
+//     for(int i=0;i<size;i++){
+//         output_ctimes[i] = ctimes[i][0];
+//     }
 
-    return output_ctimes;
-}
+//     return output_ctimes;
+// }
 
 bool isReady(int index, int machine_n, int currTime, int* job_total, int* job_free, int* job_endFlag){
     if(job_endFlag[index]== 1 && job_free[index] == 0 && TimeLeft(machine_n, currTime, job_total)) return true;
@@ -274,7 +274,7 @@ int main(int argc, char** argv) {
     int* ctimes;
     
     //ricardo = read_orlib(argv[1], &jobs, &machines);
-    ricardo = read_orlib("instance5.txt", &jobs, &machines);
+    ricardo = read_orlib("instance6.txt", &jobs, &machines);
     printVector(ricardo);
     
     int currTime = 0;
@@ -290,6 +290,7 @@ int main(int argc, char** argv) {
     // int ** output = new int * [jobs];
     // for (int i = 0; i<jobs; i++)
 	// 	output[i] = new int [machines];
+    vector<array<int,3>> chosen;
     vector<stack<int>> output;
     for(int i=0;i<jobs;i++){
         stack<int> job;
@@ -329,18 +330,38 @@ int main(int argc, char** argv) {
             duration = ricardo[i][job_index[i]][1];
             machine_n = ricardo[i][job_index[i]][0];
             //pętla dodająca taski sprawdzone f isReady do wektora
-            job_ready = isReady(i, machine_n, currTime, job_total, job_free, job_endFlag);
-            
-            if(job_ready){
+            if(isReady(i, machine_n, currTime, job_total, job_free, job_endFlag)){
+                chosen.push_back({duration,machine_n,i});
+            }
+        }
+        // for (const auto& tablica : chosen){
+        // cout << "[" << tablica[0] << ", " << tablica[1] <<", "<<tablica[2]<< "] ";
+        // }
+        //cout<<endl;
+        sort(chosen.begin(), chosen.end(), compareTasks);
+        // for (const auto& tablica : chosen){
+        // cout << "[" << tablica[0] << ", " << tablica[1] <<", "<<tablica[2]<< "] ";
+        // }
+
+        for (int i=0;i<chosen.size();i++){
+            if(isReady(chosen[i][2], chosen[i][1], currTime, job_total, job_free, job_endFlag)){
                 success = true;
-                PutInVec(i,machine_n,duration,currTime,job_total,job_free,job_index,ricardo);
-                if(job_index[i] == machines) job_endFlag[i] = 0;
+                PutInVec(chosen[i][2],chosen[i][1],chosen[i][0],currTime,job_total,job_free,job_index,ricardo);
+                if(job_index[chosen[i][2]] == machines) job_endFlag[chosen[i][2]] = 0;
                 //cout<<"X: "<<ricardo[i][job_index[i]-1][0]<<" "<<ricardo[i][job_index[i]-1][1]<<endl;
-                output[i].push(currTime);
+                output[chosen[i][2]].push(currTime);
                 control++;
             }
         }
-
+        chosen.clear();
+        // if(job_ready){
+        //     success = true;
+        //     PutInVec(i,machine_n,duration,currTime,job_total,job_free,job_index,ricardo);
+        //     if(job_index[i] == machines) job_endFlag[i] = 0;
+        //     //cout<<"X: "<<ricardo[i][job_index[i]-1][0]<<" "<<ricardo[i][job_index[i]-1][1]<<endl;
+        //     output[i].push(currTime);
+        //     control++;
+        // }
         currTime = currTimeJump(currTime, job_total, machines, success);
         //cout<<currTime;
         //cout<<endl;
@@ -348,11 +369,14 @@ int main(int argc, char** argv) {
         //printArray(job_total,machines);
         //cout<<endl;
         updateJF(job_free, goneCurrTime, currTime, jobs);
+        //cout<<"XD"<<endl;
     }
     // //cout<<"Dziala XDDD"<<endl;
-    printArray(job_free, jobs);
+    //cout<<"co jest kurwa";
+    //printArray(job_free, jobs);
     printArray(job_total, machines);
-    // cout<<endl;
+    cout<<endl;
+    cout<<*max_element(job_total,job_total+machines)<<endl;
     for(int i=0;i<output.size();i++){
         PrintStack(output[i]);
         cout<<endl;
