@@ -209,16 +209,14 @@ void printVector(vector<vector<array<int,2>>> mainVector){
     cout << endl;
 }
 
-void PrintStack(stack<int>& stk)
-{
+void PrintStack(stack<int> &stk, ofstream &outputFile)
+{   
     if (stk.empty())
         return;
-
     int top = stk.top();
     stk.pop();
-    PrintStack(stk);
-    cout << top << " ";
-    //stk.push(top);
+    PrintStack(stk, outputFile);
+    outputFile << top << " ";
 }
 
 void updateJF(int* jobs_free, int GoneCurrTime, int CurrTime,int jobs){
@@ -274,7 +272,7 @@ int main(int argc, char** argv) {
     int* ctimes;
     
     //ricardo = read_orlib(argv[1], &jobs, &machines);
-    ricardo = read_orlib("instance6.txt", &jobs, &machines);
+    ricardo = read_orlib("instance5.txt", &jobs, &machines);
     printVector(ricardo);
     
     int currTime = 0;
@@ -377,10 +375,13 @@ int main(int argc, char** argv) {
     printArray(job_total, machines);
     cout<<endl;
     cout<<*max_element(job_total,job_total+machines)<<endl;
+
+    ofstream outFile("output.txt");
     for(int i=0;i<output.size();i++){
-        PrintStack(output[i]);
-        cout<<endl;
+        PrintStack(output[i], outFile); //dodac na poczatek pliku Cmax
+        outFile<<endl;
     }
+    outFile.close();
     
     // // for (const auto& innerVector : ctimes) {
     // //     cout << "(" << innerVector[0] << ", " << innerVector[1] << ") ";
