@@ -374,9 +374,12 @@ int main(int argc, char** argv) {
     //printArray(job_free, jobs);
     printArray(job_total, machines);
     cout<<endl;
-    cout<<*max_element(job_total,job_total+machines)<<endl;
+    
 
     ofstream outFile("output.txt");
+
+    outFile<<*max_element(job_total,job_total+machines)<<endl;
+
     for(int i=0;i<output.size();i++){
         PrintStack(output[i], outFile); //dodac na poczatek pliku Cmax
         outFile<<endl;
