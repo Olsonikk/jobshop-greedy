@@ -130,7 +130,7 @@ int currTimeJump(int currTime, int* job_total, int machines, bool success){ //je
     smallest = INT_MAX;
     second_smallest = INT_MAX;
 
-    for (int i = 0; i < machines; ++i) {
+    for (int i = 0; i < machines; i++) {
         if (job_total[i] < smallest) {
             second_smallest = smallest;
             smallest = job_total[i];
@@ -149,24 +149,37 @@ int currTimeJump(int currTime, int* job_total, int machines, bool success){ //je
     
 }
 
-void putTasks(int jobs, int machines, vector<vector<array<int,2>>> &arr, int *jobs_free, int& currTime, int* job_total, int* priority,int& ctrl,vector<stack<int>> &out){
+void PutInVec(int index,int machine_n,int duration, int currTime, int* job_total, int* job_free, int* job_index,vector<vector<array<int,2>>> &arr){
+    // if(TimeLeft(machine_n,currTime,job_total)){ //success!
+    //     job_free[index]=duration;
+    //     job_total[machine_n] += duration;
+    //     job_index[index]++;
+    //     return true;
+    // }
+    // return false;
+    job_free[index]=duration;
+    job_total[machine_n] += duration;
+    job_index[index]++;
+}
+
+void putTasks(int jobs, int machines, vector<vector<array<int,2>>> &arr, int *jobs_free, int& currTime, int* job_total,int& ctrl,vector<stack<int>> &out){
     int duration,machine_n;
     bool jobs_inserted;
     for(int i=0;i<jobs;i++){
-        if(jobs_free[priority[i]] == 0){  
+        if(jobs_free[i] == 0){  
             jobs_inserted = false;
             for(int j=0;j<machines;j++){
-                duration = arr[priority[i]][j][1];
-                machine_n = arr[priority[i]][j][0];
+                duration = arr[i][j][1];
+                machine_n = arr[i][j][0];
                 //do osobnej funkcji bool
                 if(machine_n>=0){
                     if(TimeLeft(machine_n,currTime,job_total)){ //success!
                         jobs_inserted = true;
-                        jobs_free[priority[i]]=duration;
+                        jobs_free[i]=duration;
                         //przerobić na funkcje
-                        out[priority[i]].push(currTime);
+                        out[i].push(currTime);
                         job_total[machine_n] += duration;
-                        arr[priority[i]][j][0]=-1;
+                        arr[i][j][0]=-1;
                         ctrl++;
                     }
                     break;
@@ -175,7 +188,7 @@ void putTasks(int jobs, int machines, vector<vector<array<int,2>>> &arr, int *jo
         }
     }
 
-    currTime = currTimeJump(currTime, job_total, jobs, jobs_inserted);
+    currTime = currTimeJump(currTime, job_total, machines, jobs_inserted);
 }
 
 void printArray(int* array, int jobs){
@@ -200,7 +213,6 @@ void PrintStack(stack<int>& stk)
 {
     if (stk.empty())
         return;
-
 
     int top = stk.top();
     stk.pop();
@@ -245,25 +257,34 @@ int* Priority(vector<vector<array<int,2>>> VectorOfVectors){
     return output_ctimes;
 }
 
+bool isReady(int index, int machine_n, int currTime, int* job_total, int* job_free, int* job_endFlag){
+    if(job_endFlag[index]== 1 && job_free[index] == 0 && TimeLeft(machine_n, currTime, job_total)) return true;
+    return false;
+}
+
 int main(int argc, char** argv) {
-    int jobs, machines;
+    int jobs, machines,cmax;
+    int duration,machine_n;
     vector<vector<array<int,2>>> ricardo;
 
-    //ricardo = read_tailard("tai01.txt",&jobs, &machines);
-    //printVector(ricardo);
-    //cout<<jobs<<" "<<machines<<endl;
+    // ricardo = read_tailard("tai80.txt",&jobs, &machines);
+    // printVector(ricardo);
+
     int control = 0;
     int* ctimes;
     
     //ricardo = read_orlib(argv[1], &jobs, &machines);
-    ricardo = read_orlib("instance3.txt", &jobs, &machines);
-    cout<<jobs<<" "<<machines<<endl;
+    ricardo = read_orlib("instance5.txt", &jobs, &machines);
     printVector(ricardo);
     
     int currTime = 0;
     int goneCurrTime;
-    int * jobs_free = new int[jobs];
-    fill_n(jobs_free, jobs, 0);
+    int * job_endFlag = new int[jobs];
+    fill_n(job_endFlag, jobs, 1);
+    int * job_index = new int[jobs];
+    fill_n(job_index, jobs, 0);
+    int * job_free = new int[jobs];
+    fill_n(job_free, jobs, 0);
     int * job_total = new int[machines];
     fill_n(job_total, machines, 0);
     // int ** output = new int * [jobs];
@@ -274,30 +295,62 @@ int main(int argc, char** argv) {
         stack<int> job;
         output.push_back(job);
     }
-
-    // cout << "JOBS: " << jobs << endl << "MACHINES: " << machines << endl;
-        
-    //printVector(ricardo);
-    ctimes = Priority(ricardo);
-    //cout<<"priority: ";
-    //printArray(ctimes,jobs);
     
+    bool job_ready,success;
+
     while(control<jobs*machines){
-        // printArray(jobs_free, jobs);
-        // printArray(job_total,jobs);
-        updateJF(jobs_free, goneCurrTime, currTime, jobs);
-        //cout<<currTime<<endl;
         goneCurrTime = currTime;
-        putTasks(jobs,machines,ricardo,jobs_free,currTime,job_total,ctimes,control,output);
-        // printVector(ricardo);
-        printArray(jobs_free, jobs);
-        printArray(job_total, machines);
-        
-        // cout<<control<<endl;
-        cout<<endl<<endl;
+        success = false;
+        //putTasks(jobs,machines,ricardo,jobs_free,currTime,job_total,control,output);
+        // for(int i=0;i<jobs;i++){
+        //     if(job_endFlag[i]==1){
+        //         //cout<<i<<" "<<job_index[i]<<endl;
+        //         job_ready = false;
+        //         if(job_free[i] == 0){  
+        //             duration = ricardo[i][job_index[i]][1];
+        //             machine_n = ricardo[i][job_index[i]][0];
+        //             // cout<<"X "<<machine_n<<" "<<duration<<endl;
+        //             //do osobnej funkcji bool
+        //             //job_ready = PutInVec(i,machine_n,duration,currTime,job_total,job_free,job_index,ricardo);
+        //             job_ready = TimeLeft(machine_n, currTime, job_total);
+        //         }
+        //         if(job_ready){
+        //             success = true;
+        //             PutInVec(i,machine_n,duration,currTime,job_total,job_free,job_index,ricardo);
+        //             if(job_index[i] == machines) job_endFlag[i] = 0;
+        //             //cout<<"X: "<<ricardo[i][job_index[i]-1][0]<<" "<<ricardo[i][job_index[i]-1][1]<<endl;
+        //             output[i].push(currTime);
+        //             control++;
+        //         }
+        //     }
+        // }
+        for(int i=0;i<jobs;i++){
+            job_ready = false;
+            duration = ricardo[i][job_index[i]][1];
+            machine_n = ricardo[i][job_index[i]][0];
+            //pętla dodająca taski sprawdzone f isReady do wektora
+            job_ready = isReady(i, machine_n, currTime, job_total, job_free, job_endFlag);
+            
+            if(job_ready){
+                success = true;
+                PutInVec(i,machine_n,duration,currTime,job_total,job_free,job_index,ricardo);
+                if(job_index[i] == machines) job_endFlag[i] = 0;
+                //cout<<"X: "<<ricardo[i][job_index[i]-1][0]<<" "<<ricardo[i][job_index[i]-1][1]<<endl;
+                output[i].push(currTime);
+                control++;
+            }
+        }
+
+        currTime = currTimeJump(currTime, job_total, machines, success);
+        //cout<<currTime;
+        //cout<<endl;
+        //printArray(job_free,jobs);
+        //printArray(job_total,machines);
+        //cout<<endl;
+        updateJF(job_free, goneCurrTime, currTime, jobs);
     }
     // //cout<<"Dziala XDDD"<<endl;
-    printArray(jobs_free, jobs);
+    printArray(job_free, jobs);
     printArray(job_total, machines);
     // cout<<endl;
     for(int i=0;i<output.size();i++){
@@ -313,8 +366,9 @@ int main(int argc, char** argv) {
     
 
     delete job_total;
-    delete jobs_free;
-    delete ctimes;
+    delete job_free;
+    delete job_endFlag;
+    delete job_index;
 
     return 0;
 }
