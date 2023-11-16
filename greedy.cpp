@@ -50,7 +50,7 @@ vector<vector<array<int,2>>> read_tailard(string filename, int* jobs, int* machi
 }
 
 vector<vector<array<int,2>>> read_orlib(string filename, int* jobs, int* machines){
-    ifstream inputFile(filename);  // Zastąp "nazwa_pliku.txt" właściwą nazwą pliku
+    ifstream inputFile(filename);
 
     if (!inputFile.is_open()) {
         cout << "Nie można otworzyć pliku!" << endl;
@@ -147,13 +147,13 @@ void updateJF(int* jobs_free, int GoneCurrTime, int CurrTime,int jobs){
 }
 
 
-bool isReady(int index, int machine_n, int currTime, int* job_total, int* job_free, int* job_endFlag){
-    if(job_endFlag[index]== 1 && job_free[index] == 0 && TimeLeft(machine_n, currTime, job_total)) return true;
+bool isReady(int index, int machine_n, int currTime, int* job_total, int* job_free){
+    if(job_free[index] == 0 && TimeLeft(machine_n, currTime, job_total)) return true;
     return false;
 }
 
 int main(int argc, char** argv) {
-    int jobs, machines,cmax;
+    int jobs, machines;
     int duration,machine_n;
     string inputFileName = argv[2];
     vector<vector<array<int,2>>> mainVector;
@@ -169,12 +169,9 @@ int main(int argc, char** argv) {
     }
 
     int control = 0;
-    int* ctimes;
     
     int currTime = 0;
-    int goneCurrTime;
-    int * job_endFlag = new int[jobs];
-    fill_n(job_endFlag, jobs, 1);
+    int goneCurrTime = 0;
     int * job_index = new int[jobs];
     fill_n(job_index, jobs, 0);
     int * job_free = new int[jobs];
@@ -190,35 +187,35 @@ int main(int argc, char** argv) {
         output.push_back(job);
     }
     
-    bool job_ready,success;
+    bool success;
 
     while(control<jobs*machines){
-        goneCurrTime = currTime;
         success = false;
 
         for(int i=0;i<jobs;i++){
-            job_ready = false;
-            duration = mainVector[i][job_index[i]][1];
-            machine_n = mainVector[i][job_index[i]][0];
+            if(job_index[i] < machines){
+                duration = mainVector[i][job_index[i]][1];
+                machine_n = mainVector[i][job_index[i]][0];
 
-            if(isReady(i, machine_n, currTime, job_total, job_free, job_endFlag)){
-                chosen.push_back({duration,machine_n,i});
+                if(isReady(i, machine_n, currTime, job_total, job_free)){
+                    chosen.push_back({duration,machine_n,i});
+                }
             }
+            
         }
 
         sort(chosen.begin(), chosen.end(), compareTasks);
 
         for (int i=0;i<chosen.size();i++){
-            if(isReady(chosen[i][2], chosen[i][1], currTime, job_total, job_free, job_endFlag)){
+            if(isReady(chosen[i][2], chosen[i][1], currTime, job_total, job_free)){
                 success = true;
                 PutInVec(chosen[i][2],chosen[i][1],chosen[i][0],currTime,job_total,job_free,job_index,mainVector);
-                if(job_index[chosen[i][2]] == machines) job_endFlag[chosen[i][2]] = 0;
-                //cout<<"X: "<<mainVector[i][job_index[i]-1][0]<<" "<<mainVector[i][job_index[i]-1][1]<<endl;
                 output[chosen[i][2]].push(currTime);
                 control++;
             }
         }
         chosen.clear();
+        goneCurrTime = currTime;
         currTime = currTimeJump(currTime, job_total, machines, success);
         updateJF(job_free, goneCurrTime, currTime, jobs);
     }
@@ -237,7 +234,6 @@ int main(int argc, char** argv) {
 
     delete job_total;
     delete job_free;
-    delete job_endFlag;
     delete job_index;
 
     return 0;
